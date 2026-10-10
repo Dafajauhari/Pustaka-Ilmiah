@@ -303,7 +303,7 @@ async function ask(o){
   o.out.hidden=false;o.out.innerHTML='';o.stop.hidden=true;
   if(!CFG.aiEndpoint){
     o.out.innerHTML=md(o.offline());
-    o.status.textContent='Mode offline: jawaban dari data bawaan, bukan AI. Aktifkan AI.';
+    o.status.textContent='Mode offline: jawaban dari data bawaan, bukan dari AI. Aktifkan AI.';
     delete ctls[o.key];return;
   }
   o.status.textContent='Berpikir…';
