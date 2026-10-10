@@ -201,8 +201,8 @@ var GATE_HTML=`
       <button class="btn primary" type="submit">Buat akun</button>
     </form>
 
-    <p class="akun-note">Akun ini tersimpan di browser perangkat ini saja dan tidak ikut ke perangkat lain. Kata sandi diacak (hash), tidak disimpan apa adanya.</p>
-    <button type="button" class="ak-guest" id="akTamu" data-ak="tamu">Lanjut tanpa akun</button>
+    <p class="akun-note">Akun ini tersimpan di browser perangkat ini saja dan tidak ikut ke perangkat lain.</p>
+    <button type="button" class="ak-guest" id="akTamu" data-ak="tamu">Guest Account</button>
   </div>
 </section>`;
 
