@@ -77,18 +77,26 @@ function langOf(s){
 var METHODS=[
   [/meta-?analys/i,'Meta-analisis'],
   [/systematic review|scoping review/i,'Tinjauan sistematis'],
+  [/mixed[- ]methods?|metode campuran/i,'Metode campuran (kualitatif dan kuantitatif)'],
+  [/research and development|penelitian dan pengembangan|\bR&D\b|\bADDIE\b|design[- ]based research/i,'Penelitian dan pengembangan (R&D)'],
+  [/action research|penelitian tindakan|classroom action/i,'Penelitian tindakan'],
   [/randomi[sz]ed|clinical trial|placebo/i,'Uji klinis atau eksperimen acak'],
   [/cohort|longitudinal|prospective study|retrospective/i,'Studi kohort atau longitudinal'],
   [/case[- ]control/i,'Studi kasus-kontrol'],
   [/cross-sectional|questionnaire|survey|kuesioner|angket|survei/i,'Survei atau studi potong lintang'],
   [/interview|focus group|thematic analysis|qualitative|ethnograph|kualitatif|wawancara/i,'Pendekatan kualitatif (wawancara atau analisis tematik)'],
   [/case study|case studies|studi kasus/i,'Studi kasus'],
+  [/quasi[- ]?experiment|kuasi[- ]?eksperimen|eksperimen semu|pre-?test|post-?test|pra-?eksperimen/i,'Kuasi-eksperimen (pretest-posttest)'],
   [/experiment|eksperimen/i,'Eksperimen'],
   [/deep learning|neural network|machine learning|transformer|convolutional|algorithm|framework|we propose|novel method/i,'Pengembangan model atau algoritma komputasi dan evaluasi'],
   [/simulation|numerical|monte carlo|model(?:l)?ing/i,'Pemodelan atau simulasi'],
   [/regression|econometric|panel data|time series|empirical|dataset|statistical|regresi|kuantitatif/i,'Analisis kuantitatif data empiris'],
   [/review|overview|perspective|we discuss|this article summari[sz]es|summari[sz]es|studi literatur|kajian pustaka/i,'Tinjauan atau artikel ulasan'],
-  [/theor(?:y|etical)|conceptual|we argue|essay/i,'Kajian teoretis atau konseptual']
+  [/theor(?:y|etical)|conceptual|we argue|essay/i,'Kajian teoretis atau konseptual'],
+  [/correlation|korelasi|korelasional|structural equation|path analysis|PLS-SEM|SEM-PLS|t-test|uji t\b|anova|chi-square/i,'Analisis korelasional atau statistik inferensial'],
+  [/descriptive|deskriptif/i,'Penelitian deskriptif'],
+  [/observational|observasional|observation/i,'Studi observasional'],
+  [/respondents|responden|participants|partisipan|sampling|sampel/i,'Penelitian empiris dengan sampel partisipan']
 ];
 function detectMethod(text){
   var s=String(text||''),hit=[],i;
