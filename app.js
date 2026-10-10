@@ -385,6 +385,43 @@ function doQa(){
   ask({key:'d',prompt:RULES+'\n\nARTIKEL:\n'+digest(a)+'\n\nPERTANYAAN PENGGUNA: '+q+'\n\nJawab berdasarkan data artikel. Bila data tidak cukup, katakan apa yang tidak ada dan sarankan membaca artikel aslinya.',offline:function(){return offQa(a,q);},out:$('#dOut'),status:$('#dStatus'),stop:$('#dStop'),go:[$('#dSum'),$('#dAsk')]});
 }
 
+/* ---------- Tebak metode dengan AI ---------- */
+function methodHead(a){return a.metodeAI?'Metode (tebakan AI)':(a.ext?'Metode (perkiraan)':'Metode');}
+function methodText(a){return (a.mine&&!a.metodeAI)?'Belum diisi. Ketuk tombol di bawah untuk menebak dari abstrak atau catatanmu.':a.metode;}
+async function doMethod(){
+  var a=byId(state.cur);if(!a)return;
+  if(!CFG.aiEndpoint){toast('Aktifkan AI di config.js dulu');return;}
+  var btn=$('#dMeth'),st=$('#dMethStatus');
+  if(btn)btn.disabled=true;
+  if(st)st.textContent='Membaca abstrak…';
+  var p='Kamu asisten riset. Dari abstrak atau catatan berikut, tentukan metode penelitiannya (desain, sampel atau data, dan teknik analisis bila disebut). Jawab dalam SATU kalimat bahasa Indonesia, maksimal 30 kata, tanpa markdown dan tanpa id. Hanya gunakan hal yang tertulis; jangan menebak angka. Jika teks tidak memuat metode yang bisa disimpulkan, jawab persis: TIDAK_JELAS.\n\nJUDUL: '+a.judul+'\nTEKS: '+a.ringkas;
+  try{
+    var res=await fetch(CFG.aiEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:p})});
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok||!data.text)throw {code:res.status===429?'rate_limited':'upstream_error'};
+    var t=data.text.replace(/\*\*/g,'').replace(/\s+/g,' ').trim().slice(0,300);
+    if(!t||/TIDAK_JELAS/.test(t)){
+      if(st)st.textContent='Teks ini tidak memuat metode yang jelas. Cek artikel aslinya.';
+    }else{
+      a.metode=t;a.metodeAI=true;
+      if(a.ext)store(EXTRA_KEY,extra);
+      if(a.mine)store('pi:mine',mine);
+      if(state.cur===a.id){
+        var m=$('#dMetode'),h=$('#dMetodeH');
+        if(m)m.textContent=methodText(a);
+        if(h)h.textContent=methodHead(a);
+        if(btn)btn.textContent='Tebak ulang dengan AI';
+        if(st)st.textContent='';
+      }
+      renderCmp();
+    }
+  }catch(e){
+    if(st)st.textContent=errCopy(e&&e.code);
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
+
 /* ---------- Detail ---------- */
 function openDetail(id){
   var a=byId(id);if(!a)return;
@@ -403,7 +440,8 @@ function openDetail(id){
     '<div class="acts" style="margin-top:0;padding-top:0"><button class="btn sm" data-act="save" data-id="'+a.id+'" aria-pressed="false">Simpan</button><button class="btn sm" data-act="cmp" data-id="'+a.id+'" aria-pressed="false">Bandingkan</button></div>'+
     '<h2>'+(a.mine?'Abstrak atau catatanmu':(a.ext?'Abstrak (bahasa asli)':'Ringkasan'))+'</h2><p class="read">'+esc(a.ringkas)+'</p>'+
     (a.temuan&&a.temuan.length?'<h2>Temuan utama</h2><ul class="pts">'+a.temuan.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':'')+
-    (!a.mine&&!a.ext?'<h2>Metode</h2><p class="read">'+esc(a.metode)+'</p>':'')+
+    '<h2 id="dMetodeH">'+methodHead(a)+'</h2><p class="read" id="dMetode">'+esc(methodText(a))+'</p>'+
+    (a.ext||a.mine?'<div class="row"><button class="btn sm" id="dMeth" data-act="meth">'+(a.metodeAI?'Tebak ulang dengan AI':'Tebak metode dengan AI')+'</button></div><div id="dMethStatus" class="status" aria-live="polite"></div>':'')+
     '<h2>Tanya AI tentang artikel ini</h2>'+
     '<div class="seg" role="radiogroup" aria-label="Gaya ringkasan">'+
       '<label><input type="radio" name="lvl" value="singkat" checked><span>Singkat</span></label>'+
@@ -453,6 +491,7 @@ document.addEventListener('click',function(e){
     case 'delmine':delMine(id);break;
     case 'sum':doSummary();break;
     case 'qa':doQa();break;
+    case 'meth':doMethod();break;
   }
 });
 document.addEventListener('keydown',function(e){
@@ -479,12 +518,20 @@ function pruneIds(){
 function afterExtra(){
   inval();renderChips();relist();renderSaved();renderCmp();
   var n=extra.length;
-  $('#fineLib').textContent='Koleksi berisi '+DATA.length+' artikel pilihan dengan ringkasan berbahasa Indonesia'+(n?', ditambah '+n.toLocaleString('id-ID')+' artikel dari Crossref yang memakai abstrak asli (umumnya bahasa Inggris, ditandai EN). ':'. ')+'Cek artikel asli lewat tautan DOI sebelum dikutip. Tambahkan artikelmu sendiri di tab Simpanan.';
+  $('#fineLib').textContent='Koleksi berisi '+DATA.length+' artikel pilihan dengan ringkasan berbahasa Indonesia'+(n?', ditambah '+n.toLocaleString('id-ID')+' artikel dari Crossref yang memakai abstrak asli (umumnya bahasa Inggris, ditandai EN). ':'. ')+'Metode untuk artikel Crossref hanya perkiraan dari abstrak. Cek artikel asli lewat tautan DOI sebelum dikutip. Tambahkan artikelmu sendiri di tab Simpanan.';
 }
 function loadExtra(force){
   if(!window.PI_FETCH_EXTRA){afterExtra();return;}
   var cached=force?null:load(EXTRA_KEY,null);
-  if(cached&&cached.length){extra=cached;inval();pruneIds();afterExtra();return;}
+  if(cached&&cached.length){
+    /* Data lama di browser belum punya metode: isi dari abstrak yang tersimpan */
+    var upgraded=false;
+    if(window.PI_DETECT_METHOD)cached.forEach(function(a){
+      if(a.ext&&/^Tidak dinyatakan di data/.test(a.metode||'')){a.metode=window.PI_DETECT_METHOD(a.ringkas);upgraded=true;}
+    });
+    if(upgraded)store(EXTRA_KEY,cached);
+    extra=cached;inval();pruneIds();afterExtra();return;
+  }
   setLoad('Memuat ±1000 artikel tambahan dari Crossref…',4);
   window.PI_FETCH_EXTRA(function(d,tot){setLoad('Memuat ±1000 artikel tambahan dari Crossref… ('+d+'/'+tot+' bidang)',Math.max(4,Math.round(d/tot*100)));}).then(function(r){
     if(!r.list.length)throw new Error('kosong');

@@ -74,9 +74,9 @@ http.createServer((req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
   if (req.method === 'POST' && url.pathname === '/api/ai') return handleAI(req, res);
   if (req.method !== 'GET') return send(res, 405, {error: 'Method tidak diizinkan.'});
-  let p = url.pathname === '/' ? '/Jurnalimkom.html' : decodeURIComponent(url.pathname);
+  let p = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
   const file = path.join(__dirname, path.normalize(p));
-  const allowed = ['Jurnalimkom.html', 'Jurnalimkom.css', 'app.js', 'data.js', 'koleksi.js', 'config.js'];
+  const allowed = ['index.html', 'Jurnalimkom.html', 'Jurnalimkom.css', 'app.js', 'data.js', 'koleksi.js', 'config.js'];
   if (!file.startsWith(__dirname) || !allowed.includes(path.basename(file))) {
     res.writeHead(404); return res.end('Tidak ditemukan');
   }
