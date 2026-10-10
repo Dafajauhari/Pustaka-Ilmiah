@@ -531,7 +531,9 @@ var METHODS=[
   [/comparison|compared|comparative|versus/i,'Studi perbandingan'],
   [/participants|respondents|students|patients|sample of|adults|children/i,'Studi empiris dengan responden atau sampel'],
   [/we (?:develop|present|introduce|describe|design|build)|a new |novel|tool|instrument|scale/i,'Pengembangan metode, alat, atau instrumen baru'],
-  [/game theor|cost-benefit|economic evaluation|input-output|equilibrium/i,'Analisis ekonomi atau model teoretis']
+  [/game theor|cost-benefit|economic evaluation|input-output|equilibrium/i,'Analisis ekonomi atau model teoretis'],
+  [/statistics|annual report|surveillance|annually reports/i,'Laporan statistik atau surveilans'],
+  [/web server|web service|software|bioinformatics|annotation|resource|platform|pipeline|toolkit|package/i,'Pengembangan perangkat lunak atau sumber daya data']
 ];
 function guessMethod(text){
   var s=String(text||''),hit=[],i;
@@ -543,7 +545,7 @@ function guessMethod(text){
 function fixMethods(list){
   var ch=false;
   list.forEach(function(a){
-    if(a.ext&&/^Tidak dinyatakan di data/.test(a.metode||'')){a.metode=guessMethod(a.ringkas);ch=true;}
+    if(a.ext&&!a.metodeAI){var m=guessMethod(a.ringkas);if(m!==a.metode){a.metode=m;ch=true;}}
   });
   return ch;
 }
