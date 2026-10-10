@@ -295,7 +295,7 @@ function showTab(v){
   fMasuk.hidden=!masuk;fDaftar.hidden=masuk;
   clearErrs(fMasuk);clearErrs(fDaftar);
   $('akGTtl').textContent=masuk?'Masuk':'Buat akun';
-  $('akGSub').textContent=masuk?'Masuk untuk memakai profilmu di perangkat ini.';
+  $('akGSub').textContent=masuk?'Masuk untuk memakai profilmu di perangkat ini.':'Gratis, selesai dalam setengah menit.';
 }
 function lockPage(on){
   LOCK.forEach(function(sel){
