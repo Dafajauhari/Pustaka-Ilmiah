@@ -295,7 +295,7 @@ function digest(a){
   return '['+a.id+'] '+a.judul+' — '+a.penulis+' ('+a.tahun+'), '+a.jurnal+'. Bidang: '+a.bidang+'. Metode: '+a.metode+'. Ringkasan: '+a.ringkas+(a.temuan&&a.temuan.length?' Temuan: '+a.temuan.join('; ')+'.':'');
 }
 function errCopy(c){
-  return c==='rate_limited' ? 'Terlalu banyak permintaan. Coba lagi beberapa menit lagi.' : 'AI tidak dapat dihubungi. Coba lagi, atau periksa server dan config.js.';
+  return c==='rate_limited' ? 'Terlalu banyak permintaan. Coba lagi beberapa menit lagi.' : 'AI tidak dapat dihubungi.';
 }
 async function ask(o){
   if(ctls[o.key])ctls[o.key].abort();
@@ -303,7 +303,7 @@ async function ask(o){
   o.out.hidden=false;o.out.innerHTML='';o.stop.hidden=true;
   if(!CFG.aiEndpoint){
     o.out.innerHTML=md(o.offline());
-    o.status.textContent='Mode offline: jawaban dari data bawaan, bukan AI. Isi aiEndpoint di config.js untuk mengaktifkan AI.';
+    o.status.textContent='Mode offline: jawaban dari data bawaan, bukan AI. Aktifkan AI.';
     delete ctls[o.key];return;
   }
   o.status.textContent='Berpikir…';
