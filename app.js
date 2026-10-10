@@ -214,13 +214,23 @@ function emptyBox(kind,text,btn){
 }
 function cmpItems(){return cmp.map(byId).filter(Boolean);}
 function cmpTable(items){
-  function row(label,fn){return '<tr><th scope="row">'+label+'</th>'+items.map(function(a){return '<td>'+fn(a)+'</td>';}).join('')+'</tr>';}
-  return '<div class="tbl-wrap"><table><thead><tr><th></th>'+items.map(function(a){return '<th scope="col" class="colh" style="--c:'+fc(a.bidang)+';--cx:'+ft(a.bidang)+'"><button class="ttl sm" data-act="open" data-id="'+a.id+'">'+esc(a.pendek+' '+a.tahun)+'</button></th>';}).join('')+'</tr></thead><tbody>'+
-    row('Bidang',function(a){return esc(a.bidang);})+
-    row('Jurnal',function(a){return esc(a.jurnal);})+
-    row('Metode',function(a){return esc(a.metode);})+
-    row('Temuan utama',function(a){return a.temuan&&a.temuan.length?'<ul>'+a.temuan.slice(0,2).map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':esc(a.ringkas.length>170?a.ringkas.slice(0,170)+'…':a.ringkas);})+
-    '</tbody></table></div>';
+  var rows=[
+    ['Bidang',function(a){return esc(a.bidang);}],
+    ['Jurnal',function(a){return esc(a.jurnal);}],
+    ['Metode',function(a){return esc(a.metode);}],
+    ['Temuan utama',function(a){return a.temuan&&a.temuan.length?'<ul>'+a.temuan.slice(0,2).map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>':esc(a.ringkas.length>170?a.ringkas.slice(0,170)+'…':a.ringkas);}]
+  ];
+  var head='<tr><th></th>'+items.map(function(a){return '<th scope="col" class="colh" style="--c:'+fc(a.bidang)+';--cx:'+ft(a.bidang)+'"><button class="ttl sm" data-act="open" data-id="'+a.id+'">'+esc(a.pendek+' '+a.tahun)+'</button></th>';}).join('')+'</tr>';
+  var body=rows.map(function(r){return '<tr><th scope="row">'+r[0]+'</th>'+items.map(function(a){return '<td>'+r[1](a)+'</td>';}).join('')+'</tr>';}).join('');
+  /* Tabel untuk layar lebar */
+  var table='<div class="tbl-wrap"><table><thead>'+head+'</thead><tbody>'+body+'</tbody></table></div>';
+  /* Daftar bertumpuk untuk HP: tiap baris perbandingan jadi satu kartu, artikel disusun ke bawah */
+  var mob='<div class="cmp-m">'+rows.map(function(r){
+    return '<section class="cm-sec"><h3 class="cm-h">'+r[0]+'</h3>'+items.map(function(a){
+      return '<div class="cm-item" style="--c:'+fc(a.bidang)+';--cx:'+ft(a.bidang)+'"><button class="cm-t" data-act="open" data-id="'+a.id+'">'+esc(a.pendek+' '+a.tahun)+'</button><div class="cm-v">'+r[1](a)+'</div></div>';
+    }).join('')+'</section>';
+  }).join('')+'</div>';
+  return table+mob;
 }
 function renderCmp(){
   var items=cmpItems();

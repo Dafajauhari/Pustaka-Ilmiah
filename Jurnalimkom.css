@@ -368,3 +368,56 @@ h2.sec::before{content:"";width:6px;height:22px;border-radius:3px;background:var
 .qinfo{margin:14px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:15px;color:var(--on-indigo)}
 .qinfo b{background:var(--hl);color:var(--hl-ink);border-radius:6px;padding:0 8px}
 .qinfo .btn{background:var(--surface);color:var(--ink);border-color:transparent;font-weight:600}
+
+/* ===== Perbaikan tampilan HP ===== */
+
+/* Kata panjang (URL, istilah teknis) tidak lagi mendorong halaman melebar */
+.app,.sheet{overflow-wrap:anywhere}
+
+/* Kolom pencarian: hilangkan tombol hapus bawaan browser, sudah ada tombol sendiri */
+.searchbox input[type=search]{-webkit-appearance:none;appearance:none}
+.searchbox input[type=search]::-webkit-search-cancel-button,
+.searchbox input[type=search]::-webkit-search-decoration{-webkit-appearance:none;display:none}
+
+/* Perbandingan: tabel di layar lebar, daftar bertumpuk di HP */
+.cmp-m{display:none}
+.cm-h{font:600 13px/1 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 12px}
+
+@media (max-width:679px){
+  .tbl-wrap{display:none}
+  .cmp-m{display:block;margin-top:14px}
+  .cm-sec{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 14px 2px;margin-bottom:12px}
+  .cm-item{border-left:5px solid var(--c);padding:2px 0 2px 12px;margin-bottom:16px}
+  .cm-t{display:inline-block;max-width:100%;text-align:left;background:var(--c);color:var(--cx);border:0;border-radius:999px;padding:5px 12px;min-height:32px;font:600 13.5px/1.35 var(--sans);cursor:pointer}
+  .cm-v{margin-top:8px;font-size:15px;line-height:1.55}
+  .cm-v ul{margin:0;padding-left:18px}
+  .cm-v li{margin-bottom:5px}
+
+  /* Tombol kartu mengisi lebar baris, jadi tidak ada tombol yatim di baris kedua */
+  .acts .btn{flex:1 1 auto}
+  .acts .btn.sm,.btn.sm{min-height:40px}
+  .hchip{min-height:36px;display:inline-flex;align-items:center}
+  .chip{min-height:38px}
+
+  /* Susunan lebih rapat di layar kecil */
+  .hero{padding:22px 16px 18px;border-radius:18px}
+  .pagehead{padding:16px;gap:12px}
+  .pagehead .ico{width:48px;height:48px}
+  .panel{padding:14px}
+  .stats{gap:8px}
+  .stat{padding:12px 10px 10px}
+  .stat span{font-size:12.5px;line-height:1.3}
+  .askrow{flex-wrap:wrap}
+  .askrow input{flex:1 1 100%}
+  .askrow .btn{flex:1 1 auto}
+  .row .btn{flex:1 1 auto}
+}
+
+/* Layar sentuh: hilangkan efek sorot yang menempel setelah diketuk */
+@media (hover:none){
+  .card:hover{transform:none;box-shadow:none;border-top-width:5px}
+  .card:hover .yr{transform:none;opacity:.75}
+  .spine:not([aria-pressed=true]):hover{transform:none}
+  .hchip:hover,.chip:hover{transform:none}
+  .btn:hover:not(:disabled){transform:none;box-shadow:none}
+}
