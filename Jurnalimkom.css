@@ -421,3 +421,98 @@ h2.sec::before{content:"";width:6px;height:22px;border-radius:3px;background:var
   .hchip:hover,.chip:hover{transform:none}
   .btn:hover:not(:disabled){transform:none;box-shadow:none}
 }
+
+/* =====================================================================
+   Penyegaran tampilan (lebih hidup): latar berwarna, kaca buram,
+   rak buku yang lebih nyata, bayangan sewarna bidang, bilah progres.
+   Blok ini ditaruh di akhir supaya menimpa aturan di atasnya.
+   ===================================================================== */
+:root{--pink:#C2255C;--teal:#0B7C86;--violet:#7A4BC9}
+html{scrollbar-color:color-mix(in srgb,var(--accent) 55%,var(--paper)) transparent}
+::selection{background:var(--hl);color:var(--hl-ink)}
+
+/* Latar: tiga cahaya lembut berwarna (biru, merah muda, hijau kebiruan) */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 6% -8%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 62%),
+    radial-gradient(760px 520px at 104% 4%,color-mix(in srgb,var(--pink) 14%,transparent),transparent 62%),
+    radial-gradient(900px 620px at 50% 112%,color-mix(in srgb,var(--teal) 14%,transparent),transparent 62%)}
+
+/* Bilah progres gulir di tepi atas (Chrome dan Edge terbaru; browser lain mengabaikan) */
+@supports (animation-timeline:scroll()){
+  @media (prefers-reduced-motion:no-preference){
+    body::after{content:"";position:fixed;top:0;left:0;right:0;height:4px;z-index:70;pointer-events:none;
+      transform-origin:0 50%;transform:scaleX(0);
+      background:linear-gradient(90deg,var(--accent),var(--pink),var(--hl));
+      animation:scrollbarFill linear both;animation-timeline:scroll(root)}
+    @keyframes scrollbarFill{to{transform:scaleX(1)}}
+  }
+}
+
+/* Navigasi: kaca buram */
+.tabs{background:color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:saturate(1.5) blur(14px);backdrop-filter:saturate(1.5) blur(14px)}
+@media (min-width:860px){
+  .tab[aria-current=page]{box-shadow:0 8px 16px -10px #E0A800}
+  .tab:not([aria-current=page]):hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
+}
+.logo{width:34px;height:34px}
+
+/* Hero: garis buku tulis + tiga cahaya warna bidang */
+.hero{position:relative;overflow:hidden;isolation:isolate;padding:30px 22px 22px;border-radius:24px;
+  background-color:var(--indigo);
+  background-image:
+    repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(255,255,255,.07) 33px,rgba(255,255,255,.07) 34px),
+    radial-gradient(520px 320px at 94% -4%,rgba(255,216,77,.30),transparent 66%),
+    radial-gradient(500px 380px at -2% 104%,rgba(194,37,92,.42),transparent 66%),
+    radial-gradient(440px 320px at 62% 124%,rgba(11,124,134,.46),transparent 66%);
+  background-size:100% 34px,auto,auto,auto;
+  box-shadow:0 28px 48px -30px rgba(27,36,102,.8)}
+.hero::after{content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;z-index:-1;
+  background:radial-gradient(circle at 32% 32%,rgba(255,216,77,.85),rgba(255,216,77,0) 70%);opacity:.32}
+.hero h1{text-wrap:balance}
+.searchbox input[type=search]{box-shadow:0 14px 30px -16px rgba(0,0,0,.6)}
+.hchip{background:rgba(255,255,255,.10);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+@media (prefers-reduced-motion:no-preference){
+  .hero{background-size:100% 34px,auto,auto,auto;animation:ruledGlow 9s linear infinite}
+  @keyframes ruledGlow{to{background-position:0 34px,0 0,0 0,0 0}}
+  .hero::after{animation:orbDrift 11s ease-in-out infinite}
+  @keyframes orbDrift{50%{transform:translate(-26px,22px) scale(1.12)}}
+}
+
+/* Rak buku: papan rak yang tebal, punggung buku mengilap dan menyala saat disorot */
+.shelf{box-shadow:0 18px 22px -16px rgba(20,23,61,.6)}
+.spine{background-image:linear-gradient(90deg,rgba(255,255,255,.20),rgba(255,255,255,0) 28%,rgba(0,0,0,.14) 100%)}
+@media (hover:hover){
+  .spine:hover{box-shadow:inset 0 0 0 1px rgba(0,0,0,.1),inset -6px 0 8px -6px rgba(0,0,0,.25),0 16px 20px -12px var(--c)}
+}
+.spine[aria-pressed=true]{box-shadow:0 0 0 3px var(--hl),0 16px 22px -10px var(--c)}
+
+/* Kartu artikel: bayangan dan tahun mengikuti warna bidang */
+.card{border-radius:18px;border-top-width:6px;box-shadow:0 14px 26px -20px var(--c)}
+.yr{color:var(--c);opacity:.6}
+@media (hover:hover){
+  .card:hover{box-shadow:0 22px 34px -16px var(--c)}
+  .card:hover .yr{opacity:1}
+}
+.ftag{box-shadow:0 4px 10px -6px var(--c)}
+.tg{border-radius:999px}
+
+/* Panel, tombol, formulir */
+.panel{border-radius:20px;box-shadow:0 20px 32px -28px rgba(20,23,61,.6)}
+.btn.primary{background-image:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 62%,var(--violet)))}
+#ideaGo{background-image:linear-gradient(135deg,var(--navy),#5B46D6)}
+#cmpGo{background-image:linear-gradient(135deg,#C2255C,#8E3CC9)}
+#nAdd{background-image:linear-gradient(135deg,#0B7C86,#15A39A)}
+.ai-out{border-radius:16px;box-shadow:0 18px 30px -26px rgba(20,23,61,.6)}
+
+/* Kepala halaman, statistik, slot perbandingan, sorotan, detail: lapisan kilau di atas warna dasar */
+.pagehead{border-radius:24px;background-image:linear-gradient(125deg,rgba(255,255,255,.18),rgba(0,0,0,.22));box-shadow:0 22px 34px -24px var(--pc,var(--indigo))}
+.stat{background-image:linear-gradient(140deg,rgba(255,255,255,.18),rgba(0,0,0,.2));box-shadow:0 16px 26px -18px var(--c)}
+.slot.on{background-image:linear-gradient(140deg,rgba(255,255,255,.16),rgba(0,0,0,.18));box-shadow:0 14px 22px -16px var(--c)}
+.spot-in{background-image:linear-gradient(135deg,rgba(255,255,255,.16),rgba(0,0,0,.18));border-radius:20px;box-shadow:0 22px 34px -22px var(--c)}
+.sheet-hero{background-image:linear-gradient(135deg,rgba(255,255,255,.16),rgba(0,0,0,.2))}
+th.colh{background-image:linear-gradient(135deg,rgba(255,255,255,.16),rgba(0,0,0,.14))}
+.tbl-wrap{box-shadow:0 22px 34px -28px rgba(20,23,61,.6)}
+.steps li{border-radius:16px}
+.stn{background-image:linear-gradient(135deg,var(--navy),#5B46D6)}
+.toast{box-shadow:0 16px 28px -14px rgba(0,0,0,.5)}
