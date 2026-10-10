@@ -507,6 +507,7 @@ $('#nAdd').addEventListener('click',addMine);
 
 /* ---------- Deteksi metode dari abstrak (disimpan di sini agar tidak bergantung pada koleksi.js) ---------- */
 var METHODS=[
+  [/mixed[- ]methods?/i,'Metode campuran (kuantitatif dan kualitatif)'],
   [/meta-?analys/i,'Meta-analisis'],
   [/systematic review|scoping review/i,'Tinjauan sistematis'],
   [/randomi[sz]ed|clinical trial|placebo/i,'Uji klinis atau eksperimen acak'],
@@ -520,7 +521,17 @@ var METHODS=[
   [/simulation|numerical|monte carlo|model(?:l)?ing/i,'Pemodelan atau simulasi'],
   [/regression|econometric|panel data|time series|empirical|dataset|statistical|measurements/i,'Analisis kuantitatif data empiris'],
   [/review|overview|perspective|we discuss|summari[sz]es/i,'Tinjauan atau artikel ulasan'],
-  [/theor(?:y|etical)|conceptual|we argue|essay/i,'Kajian teoretis atau konseptual']
+  [/theor(?:y|etical)|conceptual|we argue|essay/i,'Kajian teoretis atau konseptual'],
+  [/mathematical model|computational|finite element|density functional|lattice|molecular dynamics|bayesian|inference/i,'Pemodelan matematis atau komputasi'],
+  [/spectroscop|microscop|laborator|synthesi[sz]|in vitro|in vivo|assay|sequenc|crystal|detector|telescope|collider|we measure|measured|observations? of/i,'Pengukuran atau studi laboratorium'],
+  [/prevalence|incidence|epidemiolog|population-based|mortality/i,'Studi epidemiologi'],
+  [/remote sensing|satellite|geospatial|gis\b/i,'Analisis penginderaan jauh atau data spasial'],
+  [/policy|guideline|consensus|recommendation|position paper|statement/i,'Pedoman, kebijakan, atau pernyataan konsensus'],
+  [/data (?:from|collected)|we collected|collected data|database|large-scale|big data|records/i,'Analisis data sekunder atau data skala besar'],
+  [/comparison|compared|comparative|versus/i,'Studi perbandingan'],
+  [/participants|respondents|students|patients|sample of|adults|children/i,'Studi empiris dengan responden atau sampel'],
+  [/we (?:develop|present|introduce|describe|design|build)|a new |novel|tool|instrument|scale/i,'Pengembangan metode, alat, atau instrumen baru'],
+  [/game theor|cost-benefit|economic evaluation|input-output|equilibrium/i,'Analisis ekonomi atau model teoretis']
 ];
 function guessMethod(text){
   var s=String(text||''),hit=[],i;
