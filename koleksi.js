@@ -5,6 +5,23 @@
    Dimuat sekali lalu disimpan di browser (localStorage) agar pembukaan berikutnya instan. */
 (function(){
 'use strict';
+
+/* Pembersih data lama: artikel yang sudah tersimpan di localStorage sebelum perubahan ini
+   masih membawa kalimat "ditebak dari abstrak, cek artikel asli". Dihapus sekali saat file ini dimuat
+   (file ini dimuat sebelum app.js, jadi app.js langsung membaca data yang sudah bersih). */
+(function bersihkanDataLama(){
+  try{
+    var re=/\s*(?:—|\\u2014|-)\s*ditebak dari abstrak, cek artikel asli/g,i,k,v;
+    for(i=0;i<localStorage.length;i++){
+      k=localStorage.key(i);
+      v=localStorage.getItem(k);
+      if(v&&v.indexOf('ditebak dari abstrak')>-1){
+        localStorage.setItem(k,v.replace(re,''));
+      }
+    }
+  }catch(e){}
+})();
+
 var PER_FIELD=72;      /* per bidang untuk tiap sumber: 7 x 72 = 504, dipotong ke 500 */
 var LIMIT_EACH=500;
 var ROWS=150;
@@ -78,7 +95,7 @@ function detectMethod(text){
   for(i=0;i<METHODS.length&&hit.length<2;i++){if(METHODS[i][0].test(s))hit.push(METHODS[i][1]);}
   var n=s.match(/\b(?:n\s*=\s*|of\s+)(\d[\d,]{2,})\s+(?:participants|patients|students|respondents|subjects|studies|articles|papers|adults|children|individuals|samples)/i);
   if(!hit.length)return 'Tidak dinyatakan di abstrak (lihat artikel asli)';
- return hit.join('; ')+(n?' (sekitar '+n[1]+' '+n[0].split(/\s+/).pop()+')':'');
+  return hit.join('; ')+(n?' (sekitar '+n[1]+' '+n[0].split(/\s+/).pop()+')':'');
 }
 
 /* ---- Crossref (luar negeri) ---- */
