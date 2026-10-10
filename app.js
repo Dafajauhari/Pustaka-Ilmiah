@@ -505,6 +505,38 @@ $('#ideaGo').addEventListener('click',doIdea);
 $('#cmpGo').addEventListener('click',doCmp);
 $('#nAdd').addEventListener('click',addMine);
 
+/* ---------- Deteksi metode dari abstrak (disimpan di sini agar tidak bergantung pada koleksi.js) ---------- */
+var METHODS=[
+  [/meta-?analys/i,'Meta-analisis'],
+  [/systematic review|scoping review/i,'Tinjauan sistematis'],
+  [/randomi[sz]ed|clinical trial|placebo/i,'Uji klinis atau eksperimen acak'],
+  [/cohort|longitudinal|prospective study|retrospective/i,'Studi kohort atau longitudinal'],
+  [/case[- ]control/i,'Studi kasus-kontrol'],
+  [/cross-sectional|questionnaire|survey/i,'Survei atau studi potong lintang'],
+  [/interview|focus group|thematic analysis|qualitative|ethnograph/i,'Pendekatan kualitatif (wawancara atau analisis tematik)'],
+  [/case study|case studies/i,'Studi kasus'],
+  [/experiment/i,'Eksperimen'],
+  [/deep learning|neural network|machine learning|transformer|convolutional|algorithm|framework|we propose|novel method|segmentation/i,'Pengembangan model atau algoritma komputasi dan evaluasi'],
+  [/simulation|numerical|monte carlo|model(?:l)?ing/i,'Pemodelan atau simulasi'],
+  [/regression|econometric|panel data|time series|empirical|dataset|statistical|measurements/i,'Analisis kuantitatif data empiris'],
+  [/review|overview|perspective|we discuss|summari[sz]es/i,'Tinjauan atau artikel ulasan'],
+  [/theor(?:y|etical)|conceptual|we argue|essay/i,'Kajian teoretis atau konseptual']
+];
+function guessMethod(text){
+  var s=String(text||''),hit=[],i;
+  for(i=0;i<METHODS.length&&hit.length<2;i++){if(METHODS[i][0].test(s))hit.push(METHODS[i][1]);}
+  if(!hit.length)return 'Tidak dinyatakan di abstrak (lihat artikel asli)';
+  return hit.join('; ')+' — ditebak dari abstrak, cek artikel asli';
+}
+/* Mengganti teks metode lama pada artikel Crossref; mengembalikan true bila ada yang berubah */
+function fixMethods(list){
+  var ch=false;
+  list.forEach(function(a){
+    if(a.ext&&/^Tidak dinyatakan di data/.test(a.metode||'')){a.metode=guessMethod(a.ringkas);ch=true;}
+  });
+  return ch;
+}
+
 /* ---------- Koleksi tambahan (Crossref) ---------- */
 function setLoad(html,pct,err){
   var lb=$('#loadbar');lb.hidden=false;lb.classList.toggle('err',!!err);
@@ -525,17 +557,13 @@ function loadExtra(force){
   var cached=force?null:load(EXTRA_KEY,null);
   if(cached&&cached.length){
     /* Data lama di browser belum punya metode: isi dari abstrak yang tersimpan */
-    var upgraded=false;
-    if(window.PI_DETECT_METHOD)cached.forEach(function(a){
-      if(a.ext&&/^Tidak dinyatakan di data/.test(a.metode||'')){a.metode=window.PI_DETECT_METHOD(a.ringkas);upgraded=true;}
-    });
-    if(upgraded)store(EXTRA_KEY,cached);
+    if(fixMethods(cached))store(EXTRA_KEY,cached);
     extra=cached;inval();pruneIds();afterExtra();return;
   }
   setLoad('Memuat ±1000 artikel tambahan dari Crossref…',4);
   window.PI_FETCH_EXTRA(function(d,tot){setLoad('Memuat ±1000 artikel tambahan dari Crossref… ('+d+'/'+tot+' bidang)',Math.max(4,Math.round(d/tot*100)));}).then(function(r){
     if(!r.list.length)throw new Error('kosong');
-    extra=r.list;inval();
+    extra=r.list;fixMethods(extra);inval();
     if(r.failed===0){store(EXTRA_KEY,extra);pruneIds();$('#loadbar').hidden=true;toast(extra.length.toLocaleString('id-ID')+' artikel ditambahkan ke pustaka');}
     else setLoad('Sebagian bidang gagal dimuat ('+r.failed+' dari 7). <button class="btn sm" data-act="retry">Muat ulang</button>',100,true);
     afterExtra();
