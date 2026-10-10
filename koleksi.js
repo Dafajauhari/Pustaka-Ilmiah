@@ -78,7 +78,7 @@ function detectMethod(text){
   for(i=0;i<METHODS.length&&hit.length<2;i++){if(METHODS[i][0].test(s))hit.push(METHODS[i][1]);}
   var n=s.match(/\b(?:n\s*=\s*|of\s+)(\d[\d,]{2,})\s+(?:participants|patients|students|respondents|subjects|studies|articles|papers|adults|children|individuals|samples)/i);
   if(!hit.length)return 'Tidak dinyatakan di abstrak (lihat artikel asli)';
-  return hit.join('; ')+(n?' (sekitar '+n[1]+' '+n[0].split(/\s+/).pop()+')':'')+' — ditebak dari abstrak, cek artikel asli';
+ return hit.join('; ')+(n?' (sekitar '+n[1]+' '+n[0].split(/\s+/).pop()+')':'');
 }
 
 /* ---- Crossref (luar negeri) ---- */
