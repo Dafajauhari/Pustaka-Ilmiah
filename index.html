@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pustaka Ilmiah</title>
+<meta name="description" content="Kumpulan jurnal dan artikel ilmiah per bidang, dengan ringkasan, pencarian gagasan, dan perbandingan jurnal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="Jurnalimkom.css">
+</head>
+<body>
+
+<header class="brandbar">
+  <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="5" width="24" height="6" rx="2" fill="#2F55D4"/><rect x="7" y="13" width="21" height="6" rx="2" fill="#FFD84D"/><rect x="3" y="21" width="23" height="6" rx="2" fill="#C2255C"/></svg>
+  <span class="brand">Pustaka Ilmiah</span>
+</header>
+
+<nav class="tabs" aria-label="Menu utama">
+  <button class="tab" data-tab="lib" aria-current="page"><svg viewBox="0 0 24 24"><path d="M5 4h13a1 1 0 0 1 1 1v14H6a1 1 0 0 0-1 1V4z"/><path d="M5 20a1 1 0 0 0 1 1h13"/></svg>Pustaka</button>
+  <button class="tab" data-tab="idea"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Gagasan</button>
+  <button class="tab" data-tab="cmp"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg>Bandingkan<span class="bdg" id="bCmp" hidden></span></button>
+  <button class="tab" data-tab="sv"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>Simpanan<span class="bdg" id="bSv" hidden></span></button>
+</nav>
+
+<main class="app">
+
+  <section id="v-lib">
+    <div class="hero">
+      <h1>Temukan jurnal yang tepat, pahami isinya dengan cepat.</h1>
+      <p class="lead">Cari artikel ilmiah per bidang, minta ringkasan, dan bandingkan beberapa jurnal sekaligus.</p>
+      <label class="sr" for="q">Cari artikel</label>
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" type="search" placeholder="Cari judul, penulis, topik" autocomplete="off">
+        <button id="qclear" class="qclear" type="button" data-act="qclear" aria-label="Hapus pencarian" hidden>&times;</button>
+      </div>
+      <div class="hchips" role="group" aria-label="Contoh pencarian">
+        <button class="hchip" data-act="q" data-v="umpan balik">umpan balik</button>
+        <button class="hchip" data-act="q" data-v="motivasi">motivasi</button>
+        <button class="hchip" data-act="q" data-v="hoaks">hoaks</button>
+        <button class="hchip" data-act="q" data-v="deep learning">deep learning</button>
+        <button class="hchip" data-act="q" data-v="obesitas">obesitas</button>
+      </div>
+      <p id="qinfo" class="qinfo" role="status" aria-live="polite" hidden></p>
+      <p id="count" class="count"></p>
+    </div>
+    <div id="loadbar" class="loadbar" role="status" aria-live="polite" hidden></div>
+
+    <div class="shelf-head">
+      <h2>Rak bidang</h2>
+      <span class="muted small">Pilih satu buku untuk menyaring</span>
+    </div>
+    <div id="chips" class="shelf" role="group" aria-label="Pilih bidang"></div>
+
+    <div id="spot" class="spot" hidden></div>
+
+    <div class="bar">
+      <span id="found" class="muted"></span>
+      <select id="sort" aria-label="Urutkan artikel">
+        <option value="new">Terbaru</option>
+        <option value="old">Terlama</option>
+        <option value="az">Judul A–Z</option>
+      </select>
+    </div>
+    <div id="list" class="grid"></div>
+    <div id="more" class="more" hidden></div>
+    <p id="fineLib" class="fine">Koleksi awal berisi 23 artikel klasik yang sering dirujuk. Ringkasan ditulis ulang dalam bahasa Indonesia, bukan abstrak asli, jadi cek artikel asli lewat tautan DOI sebelum dikutip. Tambahkan artikelmu sendiri di tab Simpanan.</p>
+  </section>
+
+  <section id="v-idea" hidden>
+    <div class="pagehead ph-idea">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></span>
+      <div>
+        <h2>Cari gagasan</h2>
+        <p class="muted">Tulis topik atau ide tugasmu. Aplikasi memilih artikel yang relevan dan, dengan AI aktif, mengusulkan sudut pandang baru.</p>
+      </div>
+    </div>
+    <ol class="steps">
+      <li><span class="stn">1</span><div><b>Tulis topik</b><span>ide tugas atau pertanyaan penelitianmu</span></div></li>
+      <li><span class="stn">2</span><div><b>Pilih artikel</b><span>aplikasi mencocokkan dengan koleksi</span></div></li>
+      <li><span class="stn">3</span><div><b>Dapat gagasan</b><span>sudut pandang dan kata kunci lanjutan</span></div></li>
+    </ol>
+    <div class="panel">
+      <div class="panel-top"><label class="lbl" for="idea" style="margin:0">Topik atau gagasanmu</label><span id="modePill" class="modepill"></span></div>
+      <textarea id="idea" rows="4" placeholder="Contoh: pengaruh umpan balik guru terhadap motivasi belajar siswa"></textarea>
+      <p class="muted small" style="margin:12px 0 0">Coba salah satu contoh:</p>
+      <div id="ideaEx" class="chips wrap"></div>
+      <div class="row">
+        <button id="ideaGo" class="btn primary">Cari gagasan</button>
+        <button id="ideaStop" class="btn" hidden>Berhenti</button>
+      </div>
+      <div id="ideaStatus" class="status" aria-live="polite"></div>
+    </div>
+    <div id="ideaOut" class="ai-out" hidden></div>
+    <p class="fine">AI bisa keliru. Ketuk label artikel di jawaban untuk membuka detailnya.</p>
+  </section>
+
+  <section id="v-cmp" hidden>
+    <div class="pagehead ph-cmp">
+      <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1"/><rect x="14" y="4" width="7" height="16" rx="1"/></svg></span>
+      <div>
+        <h2>Bandingkan jurnal</h2>
+        <p class="muted">Pilih 2 sampai 4 artikel dari Pustaka untuk dilihat berdampingan.</p>
+      </div>
+    </div>
+    <div id="cmpTray"></div>
+    <div id="cmpTable"></div>
+    <div id="cmpAI" class="panel" hidden>
+      <label class="lbl" for="cmpFocus" style="margin-top:0">Fokus perbandingan (opsional)</label>
+      <input id="cmpFocus" type="text" placeholder="Contoh: mana yang lebih cocok untuk penelitian kualitatif">
+      <div class="row">
+        <button id="cmpGo" class="btn primary">Bandingkan dengan AI</button>
+        <button id="cmpStop" class="btn" hidden>Berhenti</button>
+      </div>
+      <div id="cmpStatus" class="status" aria-live="polite"></div>
+    </div>
+    <div id="cmpOut" class="ai-out" hidden></div>
+    <p class="fine">AI bisa keliru. Cek hal penting ke artikel asli.</p>
+  </section>
+
+  <section id="v-sv" hidden>
+    <div class="pagehead ph-sv">
+      <span class="ico"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg></span>
+      <div>
+        <h2>Simpanan</h2>
+        <p class="muted">Artikel yang kamu simpan dan artikel yang kamu tambahkan sendiri.</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat" style="--c:#0B7C86"><b id="stSv">0</b><span>artikel tersimpan</span></div>
+      <div class="stat" style="--c:#C2255C"><b id="stMine">0</b><span>artikelmu sendiri</span></div>
+      <div class="stat" style="--c:#7A4BC9"><b id="stFld">0</b><span>bidang berbeda</span></div>
+    </div>
+    <h2 class="sec">Tersimpan</h2>
+    <div id="svList" class="grid"></div>
+
+    <h2 class="sec">Tambah artikelmu</h2>
+    <div class="panel">
+      <p class="muted" style="margin:0">Tempel abstrak atau catatan dari artikel yang kamu baca. Artikel ini ikut muncul di pustaka dan bisa dirangkum, ditanya, dan dibandingkan. Data hanya tersimpan di perangkat ini.</p>
+      <div class="fgrid">
+        <div class="full"><label class="lbl" for="nJudul">Judul</label><input id="nJudul" type="text"></div>
+        <div><label class="lbl" for="nPenulis">Penulis</label><input id="nPenulis" type="text" placeholder="Contoh: Rahma, A., & Putra, D."></div>
+        <div><label class="lbl" for="nJurnal">Nama jurnal atau penerbit</label><input id="nJurnal" type="text"></div>
+        <div><label class="lbl" for="nTahun">Tahun</label><input id="nTahun" type="number" inputmode="numeric" min="1800" max="2100"></div>
+        <div><label class="lbl" for="nBidang">Bidang</label><select id="nBidang"></select></div>
+      </div>
+      <label class="lbl" for="nRingkas">Abstrak atau catatanmu</label>
+      <textarea id="nRingkas" rows="6"></textarea>
+      <div class="row"><button id="nAdd" class="btn primary">Tambah ke pustaka</button></div>
+    </div>
+
+    <h2 class="sec">Artikelmu</h2>
+    <div id="mineList" class="grid"></div>
+  </section>
+
+</main>
+
+<div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Detail artikel" hidden></div>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="data.js"></script>
+<script src="config.js"></script>
+<script src="koleksi.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
