@@ -5,8 +5,9 @@
    Perilaku:
    - Saat situs dibuka dan belum masuk, halaman login tampil penuh.
    - Setelah masuk atau daftar, halaman login menutup dan tombol di header menjadi profil.
-   - Tombol "Lanjut tanpa akun" ingatannya berlaku selama tab browser terbuka. Untuk mewajibkan login,
-     ubah BOLEH_TAMU di bawah menjadi false.
+   - Tombol "Guest account" masuk ke web tanpa akun; pilihan ini diingat selama tab browser terbuka.
+     Untuk mewajibkan login, ubah BOLEH_TAMU di bawah menjadi false.
+   - Setelah masuk (login, daftar, atau guest), halaman login memudar dan isi web muncul dengan animasi masuk.
 
    CATATAN PENTING: situs ini statis (GitHub Pages), jadi akun disimpan di browser perangkat ini
    (localStorage), bukan di server. Akun tidak ikut ke perangkat lain dan hilang kalau data situs dihapus.
@@ -16,7 +17,7 @@
 (function(){
 'use strict';
 
-var BOLEH_TAMU=true;   /* false = wajib masuk (tombol "Lanjut tanpa akun" disembunyikan) */
+var BOLEH_TAMU=true;   /* false = wajib masuk (tombol "Guest account" disembunyikan) */
 
 var K_USERS='pi:akun:users',K_SESI='pi:akun:sesi',K_TAMU='pi:akun:tamu';
 var ITER=150000,MAX_GAGAL=5,KUNCI_MS=30000;
@@ -59,7 +60,7 @@ var CSS=`
 /* Halaman login penuh */
 html.ak-lock,html.ak-lock body{overflow:hidden}
 .ak-gate{position:fixed;inset:0;z-index:100;display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;overflow-y:auto;background:var(--paper);color:var(--ink)}
-.ak-gate.out{opacity:0;pointer-events:none;transition:opacity .22s ease}
+.ak-gate.out{opacity:0;transform:scale(1.04);pointer-events:none;transition:opacity .32s ease,transform .32s ease}
 @media (min-width:900px){.ak-gate{grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr);grid-template-rows:1fr}}
 .ak-brand{position:relative;overflow:hidden;isolation:isolate;color:var(--on-indigo);padding:22px 20px 20px;display:flex;flex-direction:column;gap:16px;
   background-color:var(--indigo);
@@ -201,8 +202,7 @@ var GATE_HTML=`
       <button class="btn primary" type="submit">Buat akun</button>
     </form>
 
-    <p class="akun-note">Akun ini tersimpan di browser perangkat ini saja dan tidak ikut ke perangkat lain.</p>
-    <button type="button" class="ak-guest" id="akTamu" data-ak="tamu">Guest Account</button>
+    <button type="button" class="ak-guest" id="akTamu" data-ak="tamu">Guest account</button>
   </div>
 </section>`;
 
@@ -313,16 +313,52 @@ function openGate(v){
   lockPage(true);
   if(canHover()){var f=fMasuk.hidden?$('dNama'):$('mEmail');if(f)f.focus();}
 }
+/* Animasi masuk web: dijalankan setelah halaman login mulai memudar */
+function restart(sel,max){
+  var els=document.querySelectorAll(sel),n=Math.min(els.length,max||els.length),i,el;
+  for(i=0;i<n;i++){
+    el=els[i];
+    if(!el.getClientRects().length)continue;
+    el.style.animation='none';void el.offsetWidth;el.style.animation='';
+  }
+}
+function rise(sel,delay,dy){
+  var els=document.querySelectorAll(sel),i,el;
+  for(i=0;i<els.length;i++){
+    el=els[i];
+    if(!el.animate||!el.getClientRects().length)continue;
+    el.animate([{opacity:0,transform:'translateY('+dy+'px) scale(.985)'},{opacity:1,transform:'none'}],
+      {duration:650,delay:delay+i*70,easing:'cubic-bezier(.2,.8,.2,1)',fill:'backwards'});
+  }
+}
+function animateEntry(){
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  var wide=window.matchMedia&&matchMedia('(min-width:860px)').matches;
+  rise('.brandbar',0,-18);
+  rise('.tabs',70,wide?-18:44);
+  rise('.hero',110,26);
+  rise('.shelf-head',300,18);
+  rise('.shelf',340,26);
+  rise('.bar',460,18);
+  /* Putar ulang animasi pembuka milik web: logo, judul, chip, punggung buku, kartu */
+  restart('.logo rect');
+  restart('.hero h1, .hero .lead, .hero .searchbox, .hchip');
+  restart('.spine.spine-in');
+  restart('#list .rv.in',6);
+  if(btn.animate)btn.animate([{transform:'scale(.6)',opacity:0},{transform:'scale(1)',opacity:1}],
+    {duration:520,delay:420,easing:'cubic-bezier(.2,.9,.3,1.5)',fill:'backwards'});
+}
 function closeGate(){
   if(gate.hidden)return;
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
   lockPage(false);
   if(reduce){gate.hidden=true;btn.focus();return;}
   gate.classList.add('out');
-  setTimeout(function(){if(gate.classList.contains('out')){gate.hidden=true;gate.classList.remove('out');}},240);
+  setTimeout(animateEntry,120);
+  setTimeout(function(){if(gate.classList.contains('out')){gate.hidden=true;gate.classList.remove('out');}},360);
   btn.focus();
 }
-function lanjutTamu(){if(!BOLEH_TAMU)return;setTamu(true);closeGate();}
+function lanjutTamu(){if(!BOLEH_TAMU)return;setTamu(true);closeGate();toast('Masuk sebagai guest.');}
 function afterAuth(msg){setTamu(false);renderBtn();closeGate();toast(msg);}
 
 /* ---------- Dialog profil ---------- */
