@@ -19,8 +19,8 @@ var mine=load('pi:mine',[]);
 var saved=load('pi:saved',[]);
 var cmp=load('pi:cmp',[]);
 var PAGE=24;
-var state={tab:'lib',q:'',field:'Semua',sort:'new',cur:null,shown:PAGE};
-var EXTRA_KEY='pi:extra:v1';
+var state={tab:'lib',q:'',field:'Semua',sort:'new',origin:'semua',cur:null,shown:PAGE};
+var EXTRA_KEY='pi:extra:v2';
 var extra=[],_all=null,_map=null,spinesDone=false;
 var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 function inval(){_all=null;_map=null;}
@@ -76,6 +76,9 @@ function filtered(){
   var gr=groups();
   var r=all().filter(function(a){
     if(state.field!=='Semua'&&a.bidang!==state.field)return false;
+    if(state.origin==='id'&&a.asal!=='id')return false;
+    if(state.origin==='ln'&&a.asal==='id')return false;
+    if(state.origin==='ln'&&a.mine)return false;
     if(!gr.length)return true;
     var h=(a.judul+' '+a.penulis+' '+a.jurnal+' '+a.bidang+' '+(a.tags||[]).join(' ')+' '+a.ringkas).toLowerCase();
     return gr.every(function(g){return g.some(function(t){return h.indexOf(t)>-1;});});
@@ -89,6 +92,11 @@ function filtered(){
 }
 
 /* ---------- Render pustaka ---------- */
+function langBadge(a){
+  if(!a.ext)return '';
+  var id=a.lang==='id';
+  return '<span class="badge" title="'+(id?'Abstrak berbahasa Indonesia':'Abstrak berbahasa Inggris')+'">'+(id?'ID':'EN')+'</span>';
+}
 function metaLine(a){
   var y=a.tahun?', '+esc(a.tahun):'';
   return esc(a.pendek)+y+'. <i>'+esc(a.jurnal)+'</i>';
@@ -99,7 +107,7 @@ function rowHtml(a,withSum,mode){
   var cp='<button class="btn sm" data-act="cmp" data-id="'+a.id+'" aria-pressed="false">Bandingkan</button>';
   var dl='<button class="btn sm" data-act="delmine" data-id="'+a.id+'">Hapus</button>';
   return '<article class="card rv" style="--c:'+fc(a.bidang)+';--cx:'+ft(a.bidang)+'">'+
-    '<div class="card-top"><span class="ftag">'+esc(a.bidang)+'</span>'+(a.mine?'<span class="badge">Artikelmu</span>':'')+(a.ext?'<span class="badge" title="Abstrak berbahasa Inggris">EN</span>':'')+(a.tahun?'<span class="yr" aria-hidden="true">'+esc(a.tahun)+'</span>':'')+'</div>'+
+    '<div class="card-top"><span class="ftag">'+esc(a.bidang)+'</span>'+(a.mine?'<span class="badge">Artikelmu</span>':'')+langBadge(a)+(a.tahun?'<span class="yr" aria-hidden="true">'+esc(a.tahun)+'</span>':'')+'</div>'+
     '<h3><button class="ttl" data-act="open" data-id="'+a.id+'">'+hl(a.judul)+'</button></h3>'+
     '<p class="meta">'+metaLine(a)+'</p>'+
     (withSum?'<p class="sum">'+hl(a.ringkas)+'</p>':'')+
@@ -432,7 +440,7 @@ function openDetail(id){
   var det=a.rinci?', '+esc(a.rinci):'';
   sh.innerHTML='<div class="sheet-bar"><button class="btn" data-act="close" id="closeBtn">Tutup</button></div>'+
   '<div class="sheet-hero" style="--c:'+fc(a.bidang)+';--cx:'+ft(a.bidang)+'"><div class="sheet-in">'+
-    '<span class="ftag">'+esc(a.bidang)+'</span>'+(a.mine?'<span class="badge">Artikelmu</span>':'')+(a.ext?'<span class="badge">EN</span>':'')+
+    '<span class="ftag">'+esc(a.bidang)+'</span>'+(a.mine?'<span class="badge">Artikelmu</span>':'')+langBadge(a)+
     '<h1>'+esc(a.judul)+'</h1>'+
     '<p class="meta">'+esc(a.penulis)+(a.tahun?' ('+esc(a.tahun)+')':'')+'. <i>'+esc(a.jurnal)+'</i>'+det+'.</p>'+link+
   '</div></div>'+
@@ -451,7 +459,7 @@ function openDetail(id){
     '<div class="row"><button class="btn primary" id="dSum" data-act="sum">Rangkum</button><button class="btn" id="dStop" hidden>Berhenti</button></div>'+
     '<div class="askrow"><input id="dQ" type="text" placeholder="Tanya sesuatu tentang artikel ini" aria-label="Pertanyaan tentang artikel"><button class="btn" id="dAsk" data-act="qa">Tanya</button></div>'+
     '<div id="dStatus" class="status" aria-live="polite"></div><div id="dOut" class="ai-out" hidden></div>'+
-    '<p class="fine">'+(a.mine?'AI hanya membaca abstrak atau catatan yang kamu tempel. ':(a.ext?'Abstrak berasal dari penerbit lewat Crossref, dipotong bila terlalu panjang. ':'Ringkasan di atas ditulis ulang, bukan abstrak asli. '))+'AI bisa keliru. Cek hal penting ke artikel asli.</p>'+
+    '<p class="fine">'+(a.mine?'AI hanya membaca abstrak atau catatan yang kamu tempel. ':(a.ext?'Abstrak berasal dari penerbit lewat '+(a.asal==='id'?'DOAJ (jurnal Indonesia)':'Crossref')+', dipotong bila terlalu panjang. ':'Ringkasan di atas ditulis ulang, bukan abstrak asli. '))+'AI bisa keliru. Cek hal penting ke artikel asli.</p>'+
   '</div>';
   sh.hidden=false;sh.scrollTop=0;document.body.style.overflow='hidden';
   refreshToggles();
@@ -501,13 +509,21 @@ document.addEventListener('keydown',function(e){
 });
 $('#q').addEventListener('input',function(e){state.q=e.target.value;relist();});
 $('#sort').addEventListener('change',function(e){state.sort=e.target.value;relist();});
+var originSel=$('#origin');
+if(originSel)originSel.addEventListener('change',function(e){state.origin=e.target.value;relist();});
 $('#ideaGo').addEventListener('click',doIdea);
 $('#cmpGo').addEventListener('click',doCmp);
 $('#nAdd').addEventListener('click',addMine);
 
 /* ---------- Deteksi metode dari abstrak (disimpan di sini agar tidak bergantung pada koleksi.js) ---------- */
 var METHODS=[
-  [/mixed[- ]methods?/i,'Metode campuran (kuantitatif dan kualitatif)'],
+  [/mixed[- ]methods?|metode campuran/i,'Metode campuran (kuantitatif dan kualitatif)'],
+  [/research and development|r&d|penelitian pengembangan|addie|model 4d/i,'Penelitian dan pengembangan (R&D)'],
+  [/tindakan kelas|classroom action/i,'Penelitian tindakan kelas'],
+  [/kualitatif|wawancara|observasi|fenomenolog/i,'Pendekatan kualitatif (wawancara atau observasi)'],
+  [/kuantitatif|angket|kuesioner|survei|regresi/i,'Survei atau analisis kuantitatif'],
+  [/eksperimen|kuasi|quasi/i,'Eksperimen atau kuasi-eksperimen'],
+  [/studi literatur|kajian pustaka|tinjauan pustaka|literature review/i,'Tinjauan pustaka'],
   [/meta-?analys/i,'Meta-analisis'],
   [/systematic review|scoping review/i,'Tinjauan sistematis'],
   [/randomi[sz]ed|clinical trial|placebo/i,'Uji klinis atau eksperimen acak'],
@@ -562,23 +578,24 @@ function pruneIds(){
 }
 function afterExtra(){
   inval();renderChips();relist();renderSaved();renderCmp();
-  var n=extra.length;
-  $('#fineLib').textContent='Koleksi berisi '+DATA.length+' artikel pilihan dengan ringkasan berbahasa Indonesia'+(n?', ditambah '+n.toLocaleString('id-ID')+' artikel dari Crossref yang memakai abstrak asli (umumnya bahasa Inggris, ditandai EN). ':'. ')+'Metode untuk artikel Crossref hanya perkiraan dari abstrak. Cek artikel asli lewat tautan DOI sebelum dikutip. Tambahkan artikelmu sendiri di tab Simpanan.';
+  var n=extra.length,ni=extra.filter(function(a){return a.asal==='id';}).length;
+  $('#fineLib').textContent='Koleksi berisi '+DATA.length+' artikel pilihan dengan ringkasan berbahasa Indonesia'+(n?', ditambah '+n.toLocaleString('id-ID')+' artikel dengan abstrak asli dari penerbit: '+ni.toLocaleString('id-ID')+' dari jurnal Indonesia (lewat DOAJ) dan '+(n-ni).toLocaleString('id-ID')+' dari luar negeri (lewat Crossref). Bahasa abstrak ditandai ID atau EN. ':'. ')+'Metode untuk artikel Crossref hanya perkiraan dari abstrak. Cek artikel asli lewat tautan DOI sebelum dikutip. Tambahkan artikelmu sendiri di tab Simpanan.';
 }
 function loadExtra(force){
   if(!window.PI_FETCH_EXTRA){afterExtra();return;}
+  try{localStorage.removeItem('pi:extra:v1');}catch(e){}
   var cached=force?null:load(EXTRA_KEY,null);
   if(cached&&cached.length){
     /* Data lama di browser belum punya metode: isi dari abstrak yang tersimpan */
     if(fixMethods(cached))store(EXTRA_KEY,cached);
     extra=cached;inval();pruneIds();afterExtra();return;
   }
-  setLoad('Memuat ±1000 artikel tambahan dari Crossref…',4);
-  window.PI_FETCH_EXTRA(function(d,tot){setLoad('Memuat ±1000 artikel tambahan dari Crossref… ('+d+'/'+tot+' bidang)',Math.max(4,Math.round(d/tot*100)));}).then(function(r){
+  setLoad('Memuat ±1000 artikel tambahan (500 Indonesia, 500 luar negeri)…',4);
+  window.PI_FETCH_EXTRA(function(d,tot){setLoad('Memuat ±1000 artikel tambahan (500 Indonesia, 500 luar negeri)… ('+d+'/'+tot+')',Math.max(4,Math.round(d/tot*100)));}).then(function(r){
     if(!r.list.length)throw new Error('kosong');
     extra=r.list;fixMethods(extra);inval();
     if(r.failed===0){store(EXTRA_KEY,extra);pruneIds();$('#loadbar').hidden=true;toast(extra.length.toLocaleString('id-ID')+' artikel ditambahkan ke pustaka');}
-    else setLoad('Sebagian bidang gagal dimuat ('+r.failed+' dari 7). <button class="btn sm" data-act="retry">Muat ulang</button>',100,true);
+    else setLoad('Sebagian sumber gagal dimuat ('+r.failed+' dari '+(r.total||14)+' permintaan). <button class="btn sm" data-act="retry">Muat ulang</button>',100,true);
     afterExtra();
   }).catch(function(){
     setLoad('Artikel tambahan belum bisa dimuat (periksa koneksi internet). Koleksi awal tetap bisa dipakai. <button class="btn sm" data-act="retry">Coba lagi</button>',0,true);
