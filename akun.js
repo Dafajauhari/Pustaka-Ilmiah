@@ -9,6 +9,8 @@
    - Setelah masuk (login, daftar, atau guest), halaman login memudar dan isi web muncul dengan animasi masuk.
    - Tombol di header membuka halaman Profil: kartu biru berisi nama, peran, NIM, dan program studi,
      lalu bagian Data akademik, Informasi pribadi, serta Kontak dan akun. Semua kolom bisa diisi lewat "Ubah profil".
+   - Foto profil: ketuk ikon kamera di avatar. Foto dipotong persegi, dikecilkan ke 320 px, lalu disimpan
+     sebagai JPEG kecil (puluhan KB) di browser perangkat ini.
 
    CATATAN PENTING: situs ini statis (GitHub Pages), jadi akun dan data profil disimpan di browser perangkat ini
    (localStorage), bukan di server. Tidak ikut ke perangkat lain dan hilang kalau data situs dihapus.
@@ -31,7 +33,8 @@ function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}ca
 function users(){var u=load(K_USERS,{});return (u&&typeof u==='object')?u:{};}
 function cur(){
   var em=load(K_SESI,null),u=users(),r=em&&u[em];
-  if(r)return {email:em,nama:r.nama,kampus:r.kampus||'',dibuat:r.dibuat,peran:r.peran||'',nim:r.nim||'',prodi:r.prodi||'',gender:r.gender||'',tempat:r.tempat||'',tgl:r.tgl||''};
+  if(r)return {email:em,nama:r.nama,kampus:r.kampus||'',dibuat:r.dibuat,peran:r.peran||'',nim:r.nim||'',prodi:r.prodi||'',gender:r.gender||'',tempat:r.tempat||'',tgl:r.tgl||'',
+    foto:(/^data:image\/(jpeg|png|webp);base64,/.test(r.foto||'')?r.foto:'')};
   if(em)try{localStorage.removeItem(K_SESI);}catch(e){}
   return null;
 }
@@ -63,7 +66,9 @@ var IC={
   pencil:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>',
   out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
-  back:'<path d="M15 5 8 12l7 7"/>'
+  back:'<path d="M15 5 8 12l7 7"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>'
 };
 function svg(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(IC[n]||'')+'</svg>';}
 
@@ -76,6 +81,8 @@ var CSS=`
 .akun-av svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .akun-av.on{background:linear-gradient(135deg,var(--accent),#7A4BC9);color:#fff}
 .akun-lbl{max-width:11ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.akun-av{overflow:hidden}
+.akun-av img,.pf-av img{width:100%;height:100%;object-fit:cover;display:block}
 html.ak-lock,html.ak-lock body{overflow:hidden}
 
 /* Halaman login penuh */
@@ -157,6 +164,15 @@ html.ak-lock,html.ak-lock body{overflow:hidden}
 .pf-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(4,22,66,.55),rgba(4,22,66,0) 72%)}
 .pf-sky{position:absolute;right:-4px;bottom:0;width:min(64%,340px);height:auto;z-index:-1}
 .pf-av{width:84px;height:84px;border-radius:50%;border:3px solid #fff;background:linear-gradient(135deg,#6C9BFF,#7A4BC9);display:grid;place-items:center;font:700 38px/1 var(--sans);box-shadow:0 10px 24px -10px rgba(0,0,0,.5)}
+.pf-avwrap{position:relative;width:84px;height:84px}
+.pf-av{overflow:hidden}
+.pf-cam,.pf-camx{position:absolute;bottom:-2px;width:34px;height:34px;padding:0;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;color:#fff;cursor:pointer;box-shadow:0 6px 14px -6px rgba(0,0,0,.6)}
+.pf-cam{right:-6px;background:#2F7BF5}
+.pf-cam:hover{background:#4A8EF7}
+.pf-camx{left:-6px;background:#C8401F}
+.pf-camx:hover{background:#DA5233}
+.pf-camx[hidden]{display:none}
+.pf-cam svg,.pf-camx svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pf-name{margin:18px 0 0;font:700 clamp(22px,6vw,30px)/1.15 var(--sans);letter-spacing:.01em;text-transform:uppercase;overflow-wrap:anywhere}
 .pf-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .pf-pill,.pf-chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 18px;font-weight:600;font-size:16px}
@@ -273,7 +289,12 @@ var PROF_HTML=`
   <div id="pfView">
     <section class="pf-hero">
       ${SKY}
-      <div class="pf-av" id="pAv"></div>
+      <div class="pf-avwrap">
+        <div class="pf-av" id="pAv"></div>
+        <button class="pf-cam" type="button" data-ak="foto" aria-label="Pilih atau ganti foto profil">${svg('camera')}</button>
+        <button class="pf-camx" type="button" data-ak="fotoHapus" id="pFotoHapus" aria-label="Hapus foto profil" hidden>${svg('x')}</button>
+      </div>
+      <input type="file" id="pFile" accept="image/*" hidden>
       <h3 class="pf-name" id="pNama"></h3>
       <div class="pf-badges">
         <span class="pf-pill">${svg('cap')}<span id="pPeran"></span></span>
@@ -367,6 +388,11 @@ if(!BOLEH_TAMU)$('akTamu').hidden=true;
 
 /* ---------- Bantuan ---------- */
 function initial(n){return (String(n).trim().charAt(0)||'?').toUpperCase();}
+function setAvatar(el,foto,nama){
+  el.textContent='';
+  if(foto){var im=document.createElement('img');im.alt='';im.src=foto;el.appendChild(im);}
+  else el.textContent=initial(nama);
+}
 function firstName(n){return String(n).trim().split(/\s+/)[0]||'Akun';}
 function normEmail(e){return String(e||'').trim().toLowerCase();}
 function toast(m){
@@ -410,7 +436,7 @@ function salin(teks){
 /* ---------- Tombol header ---------- */
 function renderBtn(){
   var u=cur(),av=$('akAv'),lb=$('akLbl');
-  if(u){av.className='akun-av on';av.textContent=initial(u.nama);lb.textContent=firstName(u.nama);btn.setAttribute('aria-label','Profil '+u.nama);btn.setAttribute('aria-haspopup','dialog');}
+  if(u){av.className='akun-av on';setAvatar(av,u.foto,u.nama);lb.textContent=firstName(u.nama);btn.setAttribute('aria-label','Profil '+u.nama);btn.setAttribute('aria-haspopup','dialog');}
   else{av.className='akun-av';av.innerHTML=ICON;lb.textContent='Masuk';btn.setAttribute('aria-label','Masuk atau daftar');btn.removeAttribute('aria-haspopup');}
 }
 
@@ -507,7 +533,8 @@ function addRow(grp,o){
 }
 function fillProfil(u){
   var gA=$('gAkad'),gP=$('gPribadi'),gK=$('gKontak'),sisi=u.prodi||u.kampus;
-  $('pAv').textContent=initial(u.nama);
+  setAvatar($('pAv'),u.foto,u.nama);
+  $('pFotoHapus').hidden=!u.foto;
   $('pNama').textContent=u.nama;
   $('pPeran').textContent=u.peran||'Pengguna';
   var chip=$('pNimChip');
@@ -552,6 +579,51 @@ function openProfil(){
 }
 function hideProfil(){if(prof.hidden)return;resetHapus();prof.hidden=true;lockPage(false);}
 function closeProfil(){if(prof.hidden)return;hideProfil();btn.focus();}
+
+/* ---------- Foto profil ---------- */
+var FOTO_PX=320,FOTO_MAX=10*1024*1024;
+function olahFoto(file){
+  return new Promise(function(ok,tolak){
+    if(!file||!/^image\//.test(file.type))return tolak(new Error('tipe'));
+    if(file.size>FOTO_MAX)return tolak(new Error('besar'));
+    function gambar(src,w,h,selesai){
+      var sisi=Math.min(w,h),c=document.createElement('canvas'),g;
+      c.width=c.height=FOTO_PX;
+      g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,FOTO_PX,FOTO_PX);
+      g.drawImage(src,(w-sisi)/2,(h-sisi)/2,sisi,sisi,0,0,FOTO_PX,FOTO_PX);
+      if(selesai)selesai();
+      ok(c.toDataURL('image/jpeg',0.86));
+    }
+    function lewatImg(){
+      var url=URL.createObjectURL(file),im=new Image();
+      im.onload=function(){gambar(im,im.naturalWidth,im.naturalHeight,function(){URL.revokeObjectURL(url);});};
+      im.onerror=function(){URL.revokeObjectURL(url);tolak(new Error('baca'));};
+      im.src=url;
+    }
+    if(window.createImageBitmap){
+      createImageBitmap(file,{imageOrientation:'from-image'}).then(function(bm){
+        gambar(bm,bm.width,bm.height,function(){if(bm.close)bm.close();});
+      },lewatImg);
+    }else lewatImg();
+  });
+}
+$('pFile').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0],u=cur();
+  e.target.value='';
+  if(!f||!u)return;
+  olahFoto(f).then(function(data){
+    var all=users(),rec=all[u.email];
+    if(!rec)throw new Error('akun');
+    rec.foto=data;
+    if(!save(K_USERS,all))throw new Error('simpan');
+    renderBtn();fillProfil(cur());toast('Foto profil diperbarui.');
+  }).catch(function(err){
+    var m=err&&err.message;
+    toast(m==='besar'?'Foto terlalu besar. Pilih foto di bawah 10 MB.':
+          m==='simpan'?'Foto belum bisa disimpan. Penyimpanan browser penuh atau diblokir.':
+          'Foto tidak bisa dibaca. Coba format JPG atau PNG.');
+  });
+});
 
 /* ---------- Ubah profil ---------- */
 fEdit.addEventListener('submit',function(e){
@@ -644,6 +716,11 @@ function onClick(e){
     t.setAttribute('aria-label',show?'Sembunyikan kata sandi':'Tampilkan kata sandi');
   }
   else if(a==='salin')salin(t.getAttribute('data-v'));
+  else if(a==='foto')$('pFile').click();
+  else if(a==='fotoHapus'){
+    var uu=cur(),semua=users();
+    if(uu&&semua[uu.email]){delete semua[uu.email].foto;save(K_USERS,semua);renderBtn();fillProfil(cur());toast('Foto profil dihapus.');}
+  }
   else if(a==='ubah')showEdit();
   else if(a==='batal'){showView();prof.scrollTop=0;}
   else if(a==='keluar'){
