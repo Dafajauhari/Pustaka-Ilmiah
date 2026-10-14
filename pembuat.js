@@ -4,9 +4,9 @@
   var PEMBUAT = {
     nama: "Kelompok 03",
     sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
-    gmail: "dafajm9@gmail.com",      // contoh: "nama@gmail.com"
-    linkedin: "https://www.linkedin.com/in/fairuz-febrian-putra-widodo-8490a9441?utm_source=share_via&utm_content=profile&utm_medium=member_android",   // contoh: "https://www.linkedin.com/in/username"
-    instagram: "@dafajhry"   // contoh: "@username"
+    gmail: "dafajm9@gmail.com",
+    linkedin: "https://www.linkedin.com/in/fairuz-febrian-putra-widodo-8490a9441",
+    instagram: "@dafajhry"
   };
 
   var IKON = {
