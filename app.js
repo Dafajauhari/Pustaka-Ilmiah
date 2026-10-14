@@ -473,7 +473,7 @@ function closeDetail(){
 /* ---------- Navigasi & events ---------- */
 function setTab(t){
   state.tab=t;
-  ['lib','idea','cmp','sv'].forEach(function(n){var v=$('#v-'+n);v.hidden=(n!==t);v.classList.remove('view-in');if(n===t&&!RM){void v.offsetWidth;v.classList.add('view-in');}});
+  ['lib','idea','cmp','sv','me'].forEach(function(n){var v=$('#v-'+n);if(!v)return;v.hidden=(n!==t);v.classList.remove('view-in');if(n===t&&!RM){void v.offsetWidth;v.classList.add('view-in');}});
   $$('.tab').forEach(function(b){if(b.dataset.tab===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   if(t==='cmp')renderCmp();
   if(t==='sv')renderSaved();
