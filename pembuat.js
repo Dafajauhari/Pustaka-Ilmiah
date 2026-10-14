@@ -2,7 +2,7 @@
  * Edit data di bawah ini saja. Kolom yang dikosongkan tampil sebagai "Belum diisi". */
 (function () {
   var PEMBUAT = {
-    nama: "Dafa Jauhari Masnun",
+    nama: "Kelompok 03",
     sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
     gmail: "dafajm9@gmail.com",
     linkedin: "https://www.linkedin.com/in/fairuz-febrian-putra-widodo-8490a9441",
