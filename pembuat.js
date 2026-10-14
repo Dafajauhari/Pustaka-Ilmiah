@@ -2,12 +2,12 @@
  * Edit data di bawah ini saja. Kolom yang dikosongkan tampil sebagai "Belum diisi". */
 (function () {
   var PEMBUAT = {
-    nama: "Dafa Jauhari",
-    sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
-    ttl: "",        // contoh: "Pasuruan, 1 Januari 2005"
-    gmail: "",      // contoh: "nama@gmail.com"
-    linkedin: "",   // contoh: "https://www.linkedin.com/in/username"
-    instagram: ""   // contoh: "@username"
+   nama: "Dafa Jauhari",
+   sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
+   ttl: "Pasuruan, 1 Januari 2005",
+   gmail: "dafa@gmail.com",
+   linkedin: "https://www.linkedin.com/in/dafa-jauhari",
+   instagram: "@dafajauhari"
   };
 
   var IKON = {
