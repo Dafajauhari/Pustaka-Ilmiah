@@ -2,12 +2,12 @@
  * Edit data di bawah ini saja. Kolom yang dikosongkan tampil sebagai "Belum diisi". */
 (function () {
   var PEMBUAT = {
-   nama: "Dafa Jauhari",
-   sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
-   ttl: "Pasuruan, 1 Januari 2005",
-   gmail: "dafa@gmail.com",
-   linkedin: "https://www.linkedin.com/in/dafa-jauhari",
-   instagram: "@dafajauhari"
+    nama: "Dafa Jauhari",
+    sub: "Mahasiswa S1 Teknik Informatika, Universitas Negeri Surabaya",
+    ttl: "",        // contoh: "Pasuruan, 1 Januari 2005"
+    gmail: "",      // contoh: "nama@gmail.com"
+    linkedin: "",   // contoh: "https://www.linkedin.com/in/username"
+    instagram: ""   // contoh: "@username"
   };
 
   var IKON = {
@@ -75,4 +75,22 @@
   } else {
     mulai();
   }
+})();
+
+/* Cadangan: pastikan halaman tab "me" tampil walau app.js belum versi terbaru */
+(function () {
+  document.addEventListener("click", function (e) {
+    var tb = e.target.closest && e.target.closest("[data-tab]");
+    var me = document.getElementById("v-me");
+    if (!tb || !me) return;
+    if (tb.dataset.tab === "me") {
+      ["lib", "idea", "cmp", "sv"].forEach(function (n) {
+        var v = document.getElementById("v-" + n);
+        if (v) v.hidden = true;
+      });
+      me.hidden = false;
+    } else {
+      me.hidden = true;
+    }
+  });
 })();
